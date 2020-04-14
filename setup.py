@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name='cl_ner',
+    name='law-ner',
     author='Terry Luke',
     version='0.0.1',
     packages=setuptools.find_packages(),

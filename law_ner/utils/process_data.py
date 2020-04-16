@@ -66,3 +66,42 @@ def process_data(data, vocab, max_len=100):
     length = len(x)
     x = pad_sequences([x], max_len)  # left padding
     return x, length
+
+def bert_process_data(data, vocab, chunk_tags, maxlen=None): 
+    if maxlen is None:
+        maxlen = max(len(s) for s in data)
+    word2idx = dict((w, i) for i, w in enumerate(vocab))
+    x = [[word2idx.get(w[0].lower(), 1) for w in s] for s in data]  # set to <unk> (index 1) if not in vocab
+
+    y_chunk = [[chunk_tags.index(w[1]) for w in s] for s in data]
+
+    # y_chunk = numpy.expand_dims(y_chunk, 2)
+
+    x=[[vocab[i] for i in s]for s in x]
+    # for s in data:
+    #     for i in range(len(s)):
+    #         if s[i] !=0:
+    #             s[i] = vocab[s[i]-1] 
+
+    return x, y_chunk
+
+def bert_load_data():
+    train = _parse_data(open(config.train_data_path, 'rb'))
+    test = _parse_data(open(config.test_data_path, 'rb'))
+
+    word_counts = Counter(row[0].lower() for sample in train for row in sample)
+    vocab = [w for w, f in iter(word_counts.items()) if f >= 2]
+    chunk_tags = ['O', 'B-CL', 'I-CL']
+
+    # save initial config data
+    with open('model/config'+config.model_name+'.pkl', 'wb') as outp:
+        pickle.dump((vocab, chunk_tags), outp)
+
+    # train_x,train_y = _process_data(train, vocab, chunk_tags)
+    # test_x,test_y = _process_data(test, vocab, chunk_tags)
+    train=bert_process_data(train,vocab, chunk_tags)
+    test=bert_process_data(test,vocab, chunk_tags)
+
+    # return (train_x,train_y),(test_x,test_y), (vocab, chunk_tags)
+    return train,test, (vocab, chunk_tags)
+

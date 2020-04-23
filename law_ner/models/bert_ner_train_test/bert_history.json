@@ -1,0 +1,21 @@
+{
+  "val_loss": [
+    1.5942318439483643
+  ],
+  "val_crf_accuracy": [
+    0.9420289993286133
+  ],
+  "loss": [
+    1.7487965822219849
+  ],
+  "crf_accuracy": [
+    0.942029
+  ],
+  "config": {
+    "lstm_units": 200,
+    "epochs": 8,
+    "batch_size": 16,
+    "train_dataset": "train2_9.data",
+    "test_dataset": "train2_9.data"
+  }
+}

@@ -17,19 +17,21 @@ class NER:
         self.ner = None
         self.model_name = datetime.now().strftime('%Y%m%d%H%M%S')
 
-    def build_model(self, input_dim, output_dim, lstm_units, crf_units):
+    def build_model(self, input_dim, output_dim, lstm_units, crf_units,summary=True):
         self.ner = Sequential()
         self.ner.add(Embedding(input_dim=input_dim,
                                output_dim=output_dim,
                                mask_zero=True))
         self.ner.add(Bidirectional(LSTM(lstm_units // 2, return_sequences=True)))
         self.ner.add(CRF(crf_units, sparse_target=True))
-        self.ner.summary()
+        if summary:
+            self.ner.summary()
 
     def compile(self, optimizer='adam', loss=crf_loss, accuracy=None):
         if accuracy is None:
             accuracy = [crf_accuracy]
-
+        else:
+            accuracy = [crf_accuracy] + accuracy
         self.ner.compile(optimizer=optimizer,
                          loss=loss,
                          metrics=accuracy)
@@ -37,7 +39,7 @@ class NER:
     def fit(self, x_train=None, y_train=None, epochs=5, batch_size=16, x_test=None, y_test=None):
         if x_train is None:
             print('Train dataset can not be none!')
-            raise
+            return
 
         self.history = self.ner.fit(x_train,
                                     y_train,
@@ -47,8 +49,8 @@ class NER:
                                     verbose=1)
         return self.history
 
-    def predict(self):
-        return self.ner.predict()
+    def predict(self,str1):
+        return self.ner.predict(str1)
 
     def save_model(self, save_dir=config.models_path, model_name=None):
         if model_name is None:
@@ -60,9 +62,23 @@ class NER:
 
         if self.ner is None:
             print('There is no model built!')
-            raise
+            return
 
         self.ner.save(os.path.join(save_dir, 'ner.h5'))
         with open(os.path.join(save_dir, 'history.json'), 'w+') as file:
             hist = str(self.history.history).replace('\'', '\"')
-            json.dump(json.loads(hist), fp=file, indent=2)
+            hist=json.loads(hist)
+            hist['config']={'embedding_dim':config.embedding_dim,
+                    'lstm_units':config.lstm_units,
+                    'epochs':config.epochs,
+                    'batch_size':config.batch_size,
+                    'train_dataset':config.train_dataset,
+                    'test_dataset':config.train_dataset
+                    }
+            json.dump(hist, fp=file, indent=2)            
+
+    def load_weight(self,save_dir=config.models_path,model_name=None):
+        if model_name is None:
+            model_name = self.model_name
+        save_dir = os.path.join(save_dir,model_name,'ner.h5')
+        self.ner.load_weights(save_dir)

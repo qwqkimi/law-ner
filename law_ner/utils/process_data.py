@@ -2,6 +2,7 @@ import numpy
 import pickle
 import os
 
+from law_ner import config
 from collections import Counter
 from keras.preprocessing.sequence import pad_sequences
 
@@ -20,8 +21,8 @@ def load_data(train_path, test_path):
 
 
 def save_dict(vocab, chunk_tags, dict_path):
-    if os.path.exists(dict_path):
-        os.makedirs(dict_path)
+    # if os.path.exists(dict_path)!=True:
+    #     os.makedirs(dict_path)
 
     with open(dict_path, 'wb') as file:
         pickle.dump((vocab, chunk_tags), file)
@@ -75,33 +76,19 @@ def bert_process_data(data, vocab, chunk_tags, maxlen=None):
 
     y_chunk = [[chunk_tags.index(w[1]) for w in s] for s in data]
 
-    # y_chunk = numpy.expand_dims(y_chunk, 2)
-
     x=[[vocab[i] for i in s]for s in x]
-    # for s in data:
-    #     for i in range(len(s)):
-    #         if s[i] !=0:
-    #             s[i] = vocab[s[i]-1] 
-
     return x, y_chunk
 
-def bert_load_data():
-    train = _parse_data(open(config.train_data_path, 'rb'))
-    test = _parse_data(open(config.test_data_path, 'rb'))
+def bert_load_data(train_path, test_path):
+    train = _parse_data(train_path)
+    test = _parse_data(test_path)
 
     word_counts = Counter(row[0].lower() for sample in train for row in sample)
     vocab = [w for w, f in iter(word_counts.items()) if f >= 2]
     chunk_tags = ['O', 'B-CL', 'I-CL']
 
-    # save initial config data
-    with open('model/config'+config.model_name+'.pkl', 'wb') as outp:
-        pickle.dump((vocab, chunk_tags), outp)
-
-    # train_x,train_y = _process_data(train, vocab, chunk_tags)
-    # test_x,test_y = _process_data(test, vocab, chunk_tags)
     train=bert_process_data(train,vocab, chunk_tags)
     test=bert_process_data(test,vocab, chunk_tags)
 
-    # return (train_x,train_y),(test_x,test_y), (vocab, chunk_tags)
     return train,test, (vocab, chunk_tags)
 

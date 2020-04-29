@@ -279,8 +279,10 @@ $RECYCLE.BIN/
 
 /models
 
-/dataset
+law_ner/models
 
-/model_builder/bert_model.py
+law_ner/dataset
 
-/test/bert_model_test.py
+law_ner/model_builder/bert_model.py
+
+law_ner/test/bert_model_test.py

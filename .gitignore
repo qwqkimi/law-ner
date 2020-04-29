@@ -278,3 +278,9 @@ $RECYCLE.BIN/
 # End of https://www.gitignore.io/api/linux,macos,python,pycharm,windows,visualstudiocode
 
 /models
+
+/dataset
+
+/model_builder/bert_model.py
+
+/test/bert_model_test.py

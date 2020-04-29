@@ -78,3 +78,9 @@ class BertNER:
                     'test_dataset':config.train_dataset
                     }
             json.dump(hist, fp=file, indent=2)
+        
+    def load_weight(self,save_dir=config.models_path,model_name=None):
+        if model_name is None:
+            model_name = self.model_name
+        save_dir = os.path.join(save_dir,model_name,'bert_ner.h5')
+        self.bert_ner.load_weights(save_dir)

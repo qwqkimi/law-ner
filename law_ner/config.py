@@ -1,5 +1,5 @@
 import os
-train_dataset='train2_9.data'
+train_dataset='valid0_11.data'
 test_dataset='train0_1.data'
 
 
